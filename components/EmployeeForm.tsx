@@ -10,10 +10,7 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ⚠ BUG-010: `skills` is an uncontrolled default value string but the other
-  // fields below are fully controlled with useState. Mixing controlled and
-  // uncontrolled inputs in the same form causes React warnings and makes it
-  // impossible to reset the form programmatically after submission.
+  // FIX: Including 'skills' in the state makes it a Controlled Input
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -21,6 +18,7 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
     position: "",
     salary: "",
     startDate: "",
+    skills: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,8 +30,11 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
     setSubmitting(true);
     setError(null);
 
-    const skillsInput = (document.getElementById("skills") as HTMLInputElement).value;
-    const skills = skillsInput.split(",").map((s) => s.trim()).filter(Boolean);
+    // FIX: Get skills directly from state and convert to array
+    const skillsArray = form.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     const res = await fetch("/api/employees", {
       method: "POST",
@@ -41,7 +42,7 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
       body: JSON.stringify({
         ...form,
         salary: Number(form.salary),
-        skills,
+        skills: skillsArray,
       }),
     });
 
@@ -53,6 +54,18 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
     }
 
     setSubmitting(false);
+
+    // Reset all form fields to empty strings after successful submission
+    setForm({
+      firstName: "",
+      lastName: "",
+      email: "",
+      position: "",
+      salary: "",
+      startDate: "",
+      skills: "",
+    });
+
     onSuccess();
   };
 
@@ -63,13 +76,28 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        {(["firstName", "lastName", "email", "position", "salary", "startDate"] as const).map((field) => (
+        {(
+          [
+            "firstName",
+            "lastName",
+            "email",
+            "position",
+            "salary",
+            "startDate",
+          ] as const
+        ).map((field) => (
           <div key={field}>
             <label className="block text-sm font-medium text-gray-700 capitalize mb-1">
               {field.replace(/([A-Z])/g, " $1")}
             </label>
             <input
-              type={field === "salary" ? "number" : field === "startDate" ? "date" : "text"}
+              type={
+                field === "salary"
+                  ? "number"
+                  : field === "startDate"
+                    ? "date"
+                    : "text"
+              }
               name={field}
               value={form[field]}
               onChange={handleChange}
@@ -79,15 +107,15 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
         ))}
       </div>
 
-      {/* Uncontrolled input — not linked to state */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Skills (comma-separated)
         </label>
         <input
-          id="skills"
+          name="skills"
           type="text"
-          defaultValue=""
+          value={form.skills}
+          onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
       </div>

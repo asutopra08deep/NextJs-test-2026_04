@@ -3,14 +3,14 @@ import { employees } from "@/lib/data";
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const employee = employees.find((e) => e.id === params.id);
 
   if (!employee) {
     return NextResponse.json(
       { message: "Employee not found", code: "NOT_FOUND" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -19,16 +19,16 @@ export async function GET(
 
 // ⚠ BUG-006 (API): This handler is named PATCH but the client calls PUT.
 // The route will never match a PUT request from the frontend.
-export async function PATCH(
+export async function PUT( //FIX BUG-006 HERE (PATCH -> PUT)
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const index = employees.findIndex((e) => e.id === params.id);
 
   if (index === -1) {
     return NextResponse.json(
       { message: "Employee not found", code: "NOT_FOUND" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 
@@ -41,14 +41,14 @@ export async function PATCH(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   const index = employees.findIndex((e) => e.id === params.id);
 
   if (index === -1) {
     return NextResponse.json(
       { message: "Employee not found", code: "NOT_FOUND" },
-      { status: 404 }
+      { status: 404 },
     );
   }
 

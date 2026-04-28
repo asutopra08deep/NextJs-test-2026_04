@@ -123,10 +123,15 @@ export function getStats(): Stats {
   const thisMonth = now.getMonth();
   const thisYear = now.getFullYear();
 
+  // FIX: Use a Set to track unique department IDs instead of relying on the headCount property
+  const uniqueDepartments = new Set(
+    employees.map((e) => e.department?.id).filter(Boolean),
+  );
+
   return {
     totalEmployees: employees.length,
     activeEmployees: employees.filter((e) => e.status === "active").length,
-    departments: departments.length,
+    departments: uniqueDepartments.size,
     newHiresThisMonth: employees.filter((e) => {
       const d = new Date(e.startDate);
       return d.getMonth() === thisMonth && d.getFullYear() === thisYear;

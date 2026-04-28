@@ -27,7 +27,7 @@ export default function StatsWidget({ initialStats }: StatsWidgetProps) {
   // Fix: use the functional updater form → setSecondsOnPage(prev => prev + 1)
   useEffect(() => {
     const interval = setInterval(() => {
-      setSecondsOnPage(secondsOnPage + 1);
+      setSecondsOnPage((prev) => prev + 1); //fixed BUG-002 here
     }, 1000);
 
     return () => clearInterval(interval);
@@ -37,7 +37,11 @@ export default function StatsWidget({ initialStats }: StatsWidgetProps) {
     { label: "Total Employees", value: stats.totalEmployees, color: "blue" },
     { label: "Active", value: stats.activeEmployees, color: "green" },
     { label: "Departments", value: stats.departments, color: "purple" },
-    { label: "New This Month", value: stats.newHiresThisMonth, color: "orange" },
+    {
+      label: "New This Month",
+      value: stats.newHiresThisMonth,
+      color: "orange",
+    },
   ];
 
   return (

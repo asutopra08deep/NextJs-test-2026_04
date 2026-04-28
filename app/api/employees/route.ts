@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { employees, addEmployee } from "@/lib/data";
 import { Employee } from "@/types";
+//1.revalidationPath import
+import { revalidatePath } from "next/cache";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -13,11 +15,13 @@ export async function GET(request: NextRequest) {
 
   // ⚠ BUG-008: Search is case-sensitive — "alice" won't match "Alice"
   if (search) {
+    //do search case-insensitive
+    const lowerSearch = search.toLowerCase();
     filtered = filtered.filter(
       (e) =>
-        e.firstName.includes(search) ||
-        e.lastName.includes(search) ||
-        e.email.includes(search)
+        e.firstName.includes(lowerSearch) ||
+        e.lastName.includes(lowerSearch) ||
+        e.email.includes(lowerSearch),
     );
   }
 
@@ -36,12 +40,21 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
-    const { firstName, lastName, email, position, salary, startDate, skills, status } = body;
+    const {
+      firstName,
+      lastName,
+      email,
+      position,
+      salary,
+      startDate,
+      skills,
+      status,
+    } = body;
 
     if (!firstName || !lastName || !email || !position) {
       return NextResponse.json(
         { message: "Missing required fields", code: "VALIDATION_ERROR" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -60,12 +73,16 @@ export async function POST(request: NextRequest) {
 
     addEmployee(newEmployee);
 
+    //new data added, refresh the cache
+    revalidatePath("/employees");
+    revalidatePath("/");
+
     // ⚠ BUG-007: Should return 201 Created for a newly created resource, not 200
-    return NextResponse.json({ employee: newEmployee }, { status: 200 });
+    return NextResponse.json({ employee: newEmployee }, { status: 201 });
   } catch {
     return NextResponse.json(
       { message: "Internal server error", code: "SERVER_ERROR" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
