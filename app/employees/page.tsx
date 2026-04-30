@@ -1,17 +1,33 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import SearchBar from "@/components/SearchBar";
 import EmployeeCard from "@/components/EmployeeCard";
-import Pagination from "@/components/Pagination";
 import EmployeeForm from "@/components/EmployeeForm";
+import Pagination from "@/components/Pagination";
+import SearchBar from "@/components/SearchBar";
 import { useEmployees } from "@/hooks/useEmployees";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCallback, useState } from "react";
 
 export default function EmployeesPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const showForm = searchParams.get("add");
+  const setShowForm = (show: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (show) {
+      params.set("add", "true");
+    } else {
+      params.delete("add");
+    }
+
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(1);
-  const [showForm, setShowForm] = useState(false);
 
   const { employees, total, loading, error, refetch } = useEmployees({
     search,
@@ -28,10 +44,13 @@ export default function EmployeesPage() {
     refetch();
   }, [refetch]);
 
-  const handleDelete = useCallback(async (id: string) => {
-    await fetch(`/api/employees/${id}`, { method: "DELETE" });
-    refetch();
-  }, [refetch]);
+  const handleDelete = useCallback(
+    async (id: string) => {
+      await fetch(`/api/employees/${id}`, { method: "DELETE" });
+      refetch();
+    },
+    [refetch],
+  );
 
   const handleSearch = useCallback((query: string) => {
     setSearch(query);
@@ -46,7 +65,7 @@ export default function EmployeesPage() {
           <p className="text-gray-500 mt-1">{total} total employees</p>
         </div>
         <button
-          onClick={() => setShowForm((v) => !v)}
+          onClick={() => setShowForm(!showForm)}
           className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
         >
           {showForm ? "Cancel" : "Add Employee"}
@@ -64,7 +83,10 @@ export default function EmployeesPage() {
         <SearchBar onSearch={handleSearch} />
         <select
           value={status}
-          onChange={(e) => { setStatus(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setStatus(e.target.value);
+            setPage(1);
+          }}
           className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Statuses</option>
@@ -78,12 +100,12 @@ export default function EmployeesPage() {
         <div className="text-center text-gray-400 py-8">Loading...</div>
       )}
 
-      {error && (
-        <div className="text-center text-red-500 py-8">{error}</div>
-      )}
+      {error && <div className="text-center text-red-500 py-8">{error}</div>}
 
       {!loading && !error && employees.length === 0 && (
-        <div className="text-center text-gray-400 py-8">No employees found.</div>
+        <div className="text-center text-gray-400 py-8">
+          No employees found.
+        </div>
       )}
 
       {!loading && !error && (
