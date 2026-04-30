@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Stats } from "@/types";
+import { useEffect, useState, useRef } from "react";
 
 interface StatsWidgetProps {
   initialStats: Stats;
@@ -9,7 +9,7 @@ interface StatsWidgetProps {
 
 export default function StatsWidget({ initialStats }: StatsWidgetProps) {
   const [stats, setStats] = useState<Stats>(initialStats);
-  const [secondsOnPage, setSecondsOnPage] = useState(0);
+  const timerRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     async function fetchStats() {
@@ -22,12 +22,15 @@ export default function StatsWidget({ initialStats }: StatsWidgetProps) {
     fetchStats();
   }, []);
 
-  // ⚠ BUG-002: Stale closure. `secondsOnPage` inside the interval always reads
-  // the value from the first render (0). The counter will never go above 1.
-  // Fix: use the functional updater form → setSecondsOnPage(prev => prev + 1)
+  // Most efficient fix: bypass React state entirely to avoid re-rendering
+  // the whole component every second. We just update the DOM directly.
   useEffect(() => {
+    let seconds = 0;
     const interval = setInterval(() => {
-      setSecondsOnPage(secondsOnPage + 1);
+      seconds += 1;
+      if (timerRef.current) {
+        timerRef.current.textContent = `Time on page: ${seconds}s`;
+      }
     }, 1000);
 
     return () => clearInterval(interval);
@@ -37,7 +40,11 @@ export default function StatsWidget({ initialStats }: StatsWidgetProps) {
     { label: "Total Employees", value: stats.totalEmployees, color: "blue" },
     { label: "Active", value: stats.activeEmployees, color: "green" },
     { label: "Departments", value: stats.departments, color: "purple" },
-    { label: "New This Month", value: stats.newHiresThisMonth, color: "orange" },
+    {
+      label: "New This Month",
+      value: stats.newHiresThisMonth,
+      color: "orange",
+    },
   ];
 
   return (
@@ -50,8 +57,8 @@ export default function StatsWidget({ initialStats }: StatsWidgetProps) {
           </div>
         ))}
       </div>
-      <p className="text-xs text-gray-400 text-right">
-        Time on page: {secondsOnPage}s
+      <p ref={timerRef} className="text-xs text-gray-400 text-right">
+        Time on page: 0s
       </p>
     </div>
   );
