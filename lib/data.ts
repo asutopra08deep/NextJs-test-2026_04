@@ -1,4 +1,4 @@
-import { Employee, Department, Stats } from "@/types";
+import { Department, Employee, Stats } from "@/types";
 
 export const departments: Department[] = [
   { id: "d1", name: "Engineering", headCount: 25 },
@@ -107,10 +107,8 @@ export let employees: Employee[] = [
   },
 ];
 
-// ⚠ BUG-009: This function mutates the shared module-level array directly.
-// React state won't detect the change because the reference stays the same.
 export function addEmployee(employee: Employee): Employee[] {
-  employees.push(employee);
+  employees = [...employees, employee];
   return employees;
 }
 
