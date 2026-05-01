@@ -1,28 +1,40 @@
-import { notFound } from "next/navigation";
+"use client";
+
 import { getEmployeeById } from "@/lib/data";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface EmployeeDetailPageProps {
   params: { id: string };
 }
 
-export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) {
+export default function EmployeeDetailPage({
+  params,
+}: EmployeeDetailPageProps) {
   const employee = getEmployeeById(params.id);
 
   if (!employee) notFound();
 
-  // ⚠ BUG-011: `localStorage` does not exist on the server. This line runs
-  // during SSR and throws "ReferenceError: localStorage is not defined",
-  // causing a hydration mismatch and a broken page in production.
-  // Fix: move this into a useEffect inside a Client Component.
-  const lastViewed = localStorage.getItem("lastViewedEmployee");
+  const [lastViewed, setLastViewed] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedId = localStorage.getItem("lastViewedEmployee");
+    setLastViewed(storedId);
+
+    localStorage.setItem("lastViewedEmployee", employee.id);
+  }, [employee.id]);
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/employees" className="hover:text-blue-600">Employees</Link>
+        <Link href="/employees" className="hover:text-blue-600">
+          Employees
+        </Link>
         <span>/</span>
-        <span>{employee.firstName} {employee.lastName}</span>
+        <span>
+          {employee.firstName} {employee.lastName}
+        </span>
       </div>
 
       <div className="bg-white rounded-lg shadow p-6 space-y-4">
@@ -38,8 +50,8 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
               employee.status === "active"
                 ? "bg-green-100 text-green-800"
                 : employee.status === "pending"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-gray-100 text-gray-800"
+                  ? "bg-yellow-100 text-yellow-800"
+                  : "bg-gray-100 text-gray-800"
             }`}
           >
             {employee.status}
@@ -53,12 +65,16 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           </div>
           <div>
             <dt className="text-gray-500">Department</dt>
-            <dd className="text-gray-900">{employee.department?.name ?? "—"}</dd>
+            <dd className="text-gray-900">
+              {employee.department?.name ?? "—"}
+            </dd>
           </div>
           <div>
             <dt className="text-gray-500">Salary</dt>
             <dd className="text-gray-900">
-              {employee.salary > 0 ? `$${employee.salary.toLocaleString()}` : "—"}
+              {employee.salary > 0
+                ? `$${employee.salary.toLocaleString()}`
+                : "—"}
             </dd>
           </div>
           <div>
@@ -71,7 +87,10 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           <p className="text-sm text-gray-500 mb-2">Skills</p>
           <div className="flex flex-wrap gap-2">
             {employee.skills.map((skill) => (
-              <span key={skill} className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+              <span
+                key={skill}
+                className="text-sm bg-blue-50 text-blue-700 px-3 py-1 rounded-full"
+              >
                 {skill}
               </span>
             ))}
