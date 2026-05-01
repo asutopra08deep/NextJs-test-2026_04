@@ -25,6 +25,7 @@ export default function EmployeesPage() {
   // The list might not update visually because React sees no state change.
   const handleFormSuccess = useCallback(() => {
     setShowForm(false);
+    setPage(1);
     refetch();
   }, [refetch]);
 

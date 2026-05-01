@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Employee } from "@/types";
 
 interface UseEmployeesOptions {
@@ -26,35 +26,56 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRes
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const abortRef = useRef<AbortController | null>(null);
+
   const fetchEmployees = useCallback(async () => {
+    abortRef.current?.abort();
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
 
-    const params = new URLSearchParams({
-      search,
-      status,
-      page: String(page),
-      pageSize: String(pageSize),
-    });
+    try {
+      const params = new URLSearchParams({
+        search,
+        status,
+        page: String(page),
+        pageSize: String(pageSize),
+      });
 
-    // ⚠ BUG-004: No AbortController — if the user types quickly, a slow earlier
-    // request can resolve AFTER a newer one and overwrite the correct results.
-    const res = await fetch(`/api/employees?${params}`);
+      // ⚠ BUG-004: No AbortController — if the user types quickly, a slow earlier
+      // request can resolve AFTER a newer one and overwrite the correct results.
+      const res = await fetch(`/api/employees?${params}`, {
+        signal: controller.signal,
+      });
 
-    if (!res.ok) {
-      setError("Failed to fetch employees");
-      setLoading(false);
-      return;
+      if (!res.ok) {
+        throw new Error("Failed to fetch employees");
+      }
+
+      const json = await res.json();
+
+      setEmployees(json.data);
+      setTotal(json.total);
+    } catch (err: any) {
+      if (err.name !== "AbortError") {
+        setError(err.message || "Something went wrong");
+      }
+    } finally {
+      if (!controller.signal.aborted) {
+        setLoading(false);
+      }
     }
-
-    const json = await res.json();
-    setEmployees(json.data);
-    setTotal(json.total);
-    setLoading(false);
   }, [search, status, page, pageSize]);
 
   useEffect(() => {
     fetchEmployees();
+
+    return () => {
+      abortRef.current?.abort();
+    };
   }, [fetchEmployees]);
 
   return { employees, total, loading, error, refetch: fetchEmployees };

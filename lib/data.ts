@@ -110,7 +110,7 @@ export let employees: Employee[] = [
 // ⚠ BUG-009: This function mutates the shared module-level array directly.
 // React state won't detect the change because the reference stays the same.
 export function addEmployee(employee: Employee): Employee[] {
-  employees.push(employee);
+  employees = [...employees, employee];
   return employees;
 }
 

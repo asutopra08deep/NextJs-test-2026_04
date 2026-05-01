@@ -19,7 +19,7 @@ export async function GET(
 
 // ⚠ BUG-006 (API): This handler is named PATCH but the client calls PUT.
 // The route will never match a PUT request from the frontend.
-export async function PATCH(
+export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {

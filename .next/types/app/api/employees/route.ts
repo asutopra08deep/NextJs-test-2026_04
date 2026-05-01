@@ -1,4 +1,4 @@
-// File: C:\Employee Hire plan\Test\app\api\employees\route.ts
+// File: C:\My Projects\NextJs-test-2026_04\app\api\employees\route.ts
 import * as entry from '../../../../../app/api/employees/route.js'
 import type { NextRequest } from 'next/server.js'
 

@@ -19,7 +19,7 @@ export default function SearchBar({ onSearch, placeholder = "Search employees...
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [query]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [query, onSearch]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="relative w-full max-w-md">

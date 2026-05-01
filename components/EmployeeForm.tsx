@@ -21,6 +21,7 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
     position: "",
     salary: "",
     startDate: "",
+    skills: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,8 +33,10 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
     setSubmitting(true);
     setError(null);
 
-    const skillsInput = (document.getElementById("skills") as HTMLInputElement).value;
-    const skills = skillsInput.split(",").map((s) => s.trim()).filter(Boolean);
+    const skills = form.skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
 
     const res = await fetch("/api/employees", {
       method: "POST",
@@ -51,6 +54,16 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
       setSubmitting(false);
       return;
     }
+
+    setForm({
+      firstName: "",
+      lastName: "",
+      email: "",
+      position: "",
+      salary: "",
+      startDate: "",
+      skills: "",
+    });
 
     setSubmitting(false);
     onSuccess();
@@ -87,6 +100,9 @@ export default function EmployeeForm({ onSuccess }: EmployeeFormProps) {
         <input
           id="skills"
           type="text"
+          name="skills"
+          value={form.skills}
+          onChange={handleChange}
           defaultValue=""
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
         />

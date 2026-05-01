@@ -10,7 +10,7 @@ interface PaginationProps {
 export default function Pagination({ total, page, pageSize, onPageChange }: PaginationProps) {
   // ⚠ BUG-005: Math.floor truncates — if total=6 and pageSize=5, result is 1.
   // The second page (items 6) is unreachable. Should be Math.ceil.
-  const totalPages = Math.floor(total / pageSize);
+  const totalPages = pageSize > 0 ? Math.ceil(total / pageSize) : 0;
 
   if (totalPages <= 1) return null;
 
@@ -28,9 +28,8 @@ export default function Pagination({ total, page, pageSize, onPageChange }: Pagi
         <button
           key={p}
           onClick={() => onPageChange(p)}
-          className={`px-3 py-1 rounded border ${
-            p === page ? "bg-blue-600 text-white border-blue-600" : "hover:bg-gray-50"
-          }`}
+          className={`px-3 py-1 rounded border ${p === page ? "bg-blue-600 text-white border-blue-600" : "hover:bg-gray-50"
+            }`}
         >
           {p}
         </button>

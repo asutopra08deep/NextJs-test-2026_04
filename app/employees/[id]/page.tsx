@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getEmployeeById } from "@/lib/data";
 import Link from "next/link";
+import LastViewed from "@/components/LastViewed";
 
 interface EmployeeDetailPageProps {
   params: { id: string };
@@ -15,7 +16,6 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
   // during SSR and throws "ReferenceError: localStorage is not defined",
   // causing a hydration mismatch and a broken page in production.
   // Fix: move this into a useEffect inside a Client Component.
-  const lastViewed = localStorage.getItem("lastViewedEmployee");
 
   return (
     <div className="space-y-6">
@@ -34,13 +34,12 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
             <p className="text-gray-500">{employee.position}</p>
           </div>
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              employee.status === "active"
-                ? "bg-green-100 text-green-800"
-                : employee.status === "pending"
+            className={`px-3 py-1 rounded-full text-sm font-medium ${employee.status === "active"
+              ? "bg-green-100 text-green-800"
+              : employee.status === "pending"
                 ? "bg-yellow-100 text-yellow-800"
                 : "bg-gray-100 text-gray-800"
-            }`}
+              }`}
           >
             {employee.status}
           </span>
@@ -77,12 +76,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
             ))}
           </div>
         </div>
-
-        {lastViewed && lastViewed !== employee.id && (
-          <p className="text-xs text-gray-400">
-            Previously viewed: {lastViewed}
-          </p>
-        )}
+        <LastViewed currentId={employee.id} />
       </div>
 
       <Link href="/employees" className="text-sm text-blue-600 hover:underline">

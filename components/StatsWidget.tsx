@@ -27,7 +27,7 @@ export default function StatsWidget({ initialStats }: StatsWidgetProps) {
   // Fix: use the functional updater form → setSecondsOnPage(prev => prev + 1)
   useEffect(() => {
     const interval = setInterval(() => {
-      setSecondsOnPage(secondsOnPage + 1);
+      setSecondsOnPage(prev => prev + 1);
     }, 1000);
 
     return () => clearInterval(interval);

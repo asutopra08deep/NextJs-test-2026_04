@@ -13,11 +13,13 @@ export async function GET(request: NextRequest) {
 
   // ⚠ BUG-008: Search is case-sensitive — "alice" won't match "Alice"
   if (search) {
+    const searchData = search.toLowerCase();
+
     filtered = filtered.filter(
       (e) =>
-        e.firstName.includes(search) ||
-        e.lastName.includes(search) ||
-        e.email.includes(search)
+        e.firstName.includes(searchData) ||
+        e.lastName.includes(searchData) ||
+        e.email.includes(searchData)
     );
   }
 
@@ -61,7 +63,10 @@ export async function POST(request: NextRequest) {
     addEmployee(newEmployee);
 
     // ⚠ BUG-007: Should return 201 Created for a newly created resource, not 200
-    return NextResponse.json({ employee: newEmployee }, { status: 200 });
+    return NextResponse.json(
+      { employee: newEmployee },
+      { status: 201 }
+    );
   } catch {
     return NextResponse.json(
       { message: "Internal server error", code: "SERVER_ERROR" },

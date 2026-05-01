@@ -17,7 +17,7 @@ const STATUS_COLORS: Record<string, string> = {
 export default function EmployeeCard({ employee, onDelete }: EmployeeCardProps) {
   // ⚠ BUG-012: No null check — if `employee.department` is null (see Grace Wilson),
   // this line throws "Cannot read properties of null (reading 'name')"
-  const departmentName = employee.department?.name;
+  const departmentName = employee.department?.name ?? "-";
 
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col gap-3">
@@ -42,9 +42,9 @@ export default function EmployeeCard({ employee, onDelete }: EmployeeCardProps) 
         {/* ⚠ BUG-003: Using array index as key. If skills are sorted or
             filtered, React will reuse the wrong DOM nodes and produce
             incorrect diff/animation results. */}
-        {employee.skills.map((skill, index) => (
+        {employee.skills.map((skill) => (
           <span
-            key={index}
+            key={`${employee.id}-${skill}`}
             className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded"
           >
             {skill}
