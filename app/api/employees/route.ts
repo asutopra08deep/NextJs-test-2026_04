@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
-import { employees, addEmployee } from "@/lib/data";
+import { addEmployee, employees } from "@/lib/data";
 import { Employee } from "@/types";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -11,7 +11,6 @@ export async function GET(request: NextRequest) {
 
   let filtered = [...employees];
 
-  // ⚠ BUG-008: Search is case-sensitive — "alice" won't match "Alice"
   if (search) {
     filtered = filtered.filter(
       (e) =>
