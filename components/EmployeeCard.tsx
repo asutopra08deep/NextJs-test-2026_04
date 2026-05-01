@@ -14,10 +14,11 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-800",
 };
 
-export default function EmployeeCard({ employee, onDelete }: EmployeeCardProps) {
-  // ⚠ BUG-012: No null check — if `employee.department` is null (see Grace Wilson),
-  // this line throws "Cannot read properties of null (reading 'name')"
-  const departmentName = employee.department?.name;
+export default function EmployeeCard({
+  employee,
+  onDelete,
+}: EmployeeCardProps) {
+  const departmentName = employee.department?.name ?? "No Department";
 
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col gap-3">
@@ -28,7 +29,9 @@ export default function EmployeeCard({ employee, onDelete }: EmployeeCardProps) 
           </h3>
           <p className="text-sm text-gray-500">{employee.position}</p>
         </div>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[employee.status]}`}>
+        <span
+          className={`text-xs px-2 py-1 rounded-full font-medium ${STATUS_COLORS[employee.status]}`}
+        >
           {employee.status}
         </span>
       </div>
@@ -39,12 +42,9 @@ export default function EmployeeCard({ employee, onDelete }: EmployeeCardProps) 
       </div>
 
       <div className="flex flex-wrap gap-1">
-        {/* ⚠ BUG-003: Using array index as key. If skills are sorted or
-            filtered, React will reuse the wrong DOM nodes and produce
-            incorrect diff/animation results. */}
-        {employee.skills.map((skill, index) => (
+        {employee.skills.map((skill) => (
           <span
-            key={index}
+            key={skill}
             className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded"
           >
             {skill}
